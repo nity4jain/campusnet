@@ -2,7 +2,7 @@
 
 A secure authentication backend for CampusNet, a campus-only digital repository and networking platform. This module handles user registration, login, profile management, and JWT-based authentication.
 
-**Developed by:** [Your Name]  
+**Developed by:** Nitya Jain 
 **Date:** November 2025  
 **Institution:** Vellore Institute of Technology, AP
 
@@ -47,7 +47,7 @@ Before you begin, ensure you have the following installed:
 
 ### 1. Clone the Repository
 
-git clone <your-repository-url>
+git clone https://github.com/nity4jain/campusnet
 cd campusnet-backend
 
 text
@@ -421,6 +421,7 @@ This project is developed as part of academic coursework at Vellore Institute of
 - Department: Artificial Intelligence & Machine Learning
 - Course: Capstone Project (Review-1)
 - Date: November 2025
+
 
 
 
