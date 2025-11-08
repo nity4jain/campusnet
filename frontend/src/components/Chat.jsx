@@ -21,6 +21,7 @@ export default function Chat() {
   const [replyTo, setReplyTo] = useState(null); // { id, text, sender }
   const [openMenuId, setOpenMenuId] = useState(null);
   const [contactModal, setContactModal] = useState(null);
+  const [onCampus, setOnCampus] = useState(null); // null=unknown, true/false known
 
   // Audio recording
   const [recording, setRecording] = useState(false);
@@ -28,6 +29,38 @@ export default function Chat() {
   const [audioBlob, setAudioBlob] = useState(null);
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [category]);
+
+  // Best-effort campus network detection using provided captive portal / internal URLs.
+  // We try a few known URLs; fetch with mode:'no-cors' will either resolve (reachable) or reject (network error).
+  useEffect(() => {
+    let mounted = true;
+    async function probe() {
+      const urls = [
+        'https://hfw2.vitap.ac.in:8090/httpclient.html',
+        'https://hfw.vitap.ac.in:8090/httpclient.html',
+        'https://172.18.10.10:1000/login?'
+      ];
+      const timeoutMs = 3000;
+      for (const u of urls) {
+        try {
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), timeoutMs);
+          // mode: 'no-cors' so browsers will perform the request but we don't attempt to read response.
+          await fetch(u, { mode: 'no-cors', signal: controller.signal, cache: 'no-store' });
+          clearTimeout(id);
+          if (!mounted) return;
+          setOnCampus(true);
+          return;
+        } catch (err) {
+          // network error or timeout -> try next
+        }
+      }
+      if (!mounted) return;
+      setOnCampus(false);
+    }
+    probe();
+    return () => { mounted = false; };
+  }, []);
 
   async function handleDeleteMessage(id) {
     if (!confirm('Delete this message for everyone? This cannot be undone.')) return;
@@ -156,7 +189,7 @@ export default function Chat() {
         <h2 className="text-lg font-semibold capitalize">{category}</h2>
       </div>
 
-      <div onClick={() => setOpenMenuId(null)} className="flex-1 overflow-y-auto p-4 bg-slate-50" ref={listRef} style={{ display: 'flex', flexDirection: 'column-reverse' }}>
+  <div onClick={() => setOpenMenuId(null)} className="flex-1 overflow-y-auto p-4 bg-slate-50" ref={listRef} style={{ display: 'flex', flexDirection: 'column-reverse' }}>
         {loading ? <div className="text-sm text-slate-500">Loading...</div> : (
           messages.map(m => (
       <div key={m._id} className={`mb-3 flex ${isMine(m) ? 'justify-end' : 'justify-start'}`}>
@@ -212,6 +245,19 @@ export default function Chat() {
         )}
       </div>
 
+  {/* If onCampus is known and false, show banner with captive portal links and disable composer */}
+  {onCampus === false && (
+    <div className="p-3 bg-yellow-50 border-t text-sm text-slate-800">
+      <div className="mb-2">This feature is restricted to campus Wi‑Fi. Please connect to your college network and authenticate using one of these login pages:</div>
+      <ul className="list-disc ml-5">
+        <li><a className="text-blue-600 underline" href="https://hfw2.vitap.ac.in:8090/httpclient.html" target="_blank" rel="noreferrer">Ladies Hostel -1 login</a></li>
+        <li><a className="text-blue-600 underline" href="https://hfw.vitap.ac.in:8090/httpclient.html" target="_blank" rel="noreferrer">Men Hostel -2 login</a></li>
+        <li><a className="text-blue-600 underline" href="https://172.18.10.10:1000/login?" target="_blank" rel="noreferrer">Central block campus login</a></li>
+        <li className="mt-1 text-xs text-slate-600">After authenticating on Wi‑Fi, reload this page.</li>
+      </ul>
+    </div>
+  )}
+
   <form onSubmit={submit} className="p-3 bg-white border-t relative">
         <div className="flex items-center gap-2">
           {replyTo && (
@@ -238,16 +284,16 @@ export default function Chat() {
             )}
           </button>
 
-          <div className="flex-1">
-            <textarea value={text} onChange={e => setText(e.target.value)} placeholder="Message" className="w-full px-3 py-2 border rounded-md resize-none" rows={1} />
+            <div className="flex-1">
+            <textarea value={text} onChange={e => setText(e.target.value)} placeholder="Message" className="w-full px-3 py-2 border rounded-md resize-none" rows={1} disabled={onCampus === false} />
           </div>
 
             <div className="flex items-center gap-2">
-            <select className="text-sm border rounded px-2 py-1" value={consent ? '1' : '0'} onChange={e => setConsent(e.target.value === '1')}>
+            <select className="text-sm border rounded px-2 py-1" value={consent ? '1' : '0'} onChange={e => setConsent(e.target.value === '1')} disabled={onCampus === false}>
               <option value="0">Don't share</option>
               <option value="1">Share contact</option>
             </select>
-            <button type="submit" className="px-3 py-2 bg-gradient-to-r from-brand to-accent text-white rounded flex items-center gap-2"><PaperAirplaneIcon className="h-4 w-4 -rotate-45" />Send</button>
+            <button type="submit" className="px-3 py-2 bg-gradient-to-r from-brand to-accent text-white rounded flex items-center gap-2" disabled={onCampus === false}><PaperAirplaneIcon className="h-4 w-4 -rotate-45" />Send</button>
           </div>
         </div>
 
