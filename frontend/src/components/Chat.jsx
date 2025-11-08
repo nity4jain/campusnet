@@ -99,6 +99,10 @@ export default function Chat() {
   const [replyTo, setReplyTo] = useState(null); // { id, text, sender }
   const [openMenuId, setOpenMenuId] = useState(null);
   const [contactModal, setContactModal] = useState(null);
+  
+  // WiFi status
+  const [wifiConnected, setWifiConnected] = useState(false);
+  const [checkingWifi, setCheckingWifi] = useState(true);
 
   // Audio recording
   const [recording, setRecording] = useState(false);
@@ -115,6 +119,82 @@ export default function Chat() {
   const [eventDetails, setEventDetails] = useState({ date: '', time: '', venue: '' });
 
   const categoryConfig = CATEGORY_FEATURES[category] || CATEGORY_FEATURES.others;
+
+  // Check WiFi connection on mount
+  useEffect(() => {
+    async function checkWifi() {
+      setCheckingWifi(true);
+      try {
+        // Method 1: Check if we can reach campus network endpoints
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        
+        const campusUrls = [
+          'https://172.18.10.10:1000/login?',
+          'https://hfw2.vitap.ac.in:8090/httpclient.html',
+          'https://hfw.vitap.ac.in:8090/httpclient.html'
+        ];
+        
+        const results = await Promise.allSettled(
+          campusUrls.map(url => 
+            fetch(url, { 
+              mode: 'no-cors',
+              signal: controller.signal 
+            })
+          )
+        );
+        
+        clearTimeout(timeoutId);
+        
+        // If at least one request didn't timeout, we're on campus WiFi
+        const anySucceeded = results.some(r => r.status === 'fulfilled');
+        
+        // Method 2: Use WebRTC to get local IP (more reliable)
+        let isOnCampusNetwork = anySucceeded;
+        
+        try {
+          const pc = new RTCPeerConnection({ iceServers: [] });
+          pc.createDataChannel('');
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          
+          // Wait for ICE candidate with local IP
+          await new Promise((resolve) => {
+            pc.onicecandidate = (ice) => {
+              if (ice && ice.candidate && ice.candidate.candidate) {
+                const ipMatch = ice.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                if (ipMatch) {
+                  const localIP = ipMatch[1];
+                  // Check if IP is in campus range (172.18.x.x or vitap network)
+                  if (localIP.startsWith('172.18.') || localIP.startsWith('192.168.')) {
+                    isOnCampusNetwork = true;
+                  }
+                }
+              }
+              if (ice === null) {
+                pc.close();
+                resolve();
+              }
+            };
+            setTimeout(resolve, 1000); // Timeout after 1 second
+          });
+        } catch (e) {
+          // WebRTC failed, rely on endpoint check
+        }
+        
+        setWifiConnected(isOnCampusNetwork);
+      } catch (err) {
+        setWifiConnected(false);
+      } finally {
+        setCheckingWifi(false);
+      }
+    }
+    
+    checkWifi();
+    // Re-check every 30 seconds
+    const interval = setInterval(checkWifi, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [category]);
 
@@ -339,6 +419,50 @@ export default function Chat() {
           </div>
         </div>
       </div>
+
+      {/* WiFi Status Banner */}
+      {!checkingWifi && (
+        <div className={`px-4 py-2 text-sm font-medium flex items-center gap-2 ${
+          wifiConnected 
+            ? 'bg-green-50 text-green-800 border-b border-green-200' 
+            : 'bg-amber-50 text-amber-800 border-b border-amber-200'
+        }`}>
+          <SignalIcon className={`w-4 h-4 ${wifiConnected ? 'text-green-600' : 'text-amber-600'}`} />
+          {wifiConnected ? (
+            <span>✓ Connected to Campus WiFi</span>
+          ) : (
+            <div className="flex-1 flex items-center justify-between">
+              <span>⚠ Not connected to Campus WiFi</span>
+              <div className="text-xs space-x-3">
+                <a 
+                  href="https://hfw2.vitap.ac.in:8090/httpclient.html" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-amber-900"
+                >
+                  Ladies Hostel 1
+                </a>
+                <a 
+                  href="https://hfw.vitap.ac.in:8090/httpclient.html" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-amber-900"
+                >
+                  Men's Hostel 2
+                </a>
+                <a 
+                  href="https://172.18.10.10:1000/login?" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-amber-900"
+                >
+                  Central Block
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Messages Area */}
       <div 
