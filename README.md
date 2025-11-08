@@ -2,7 +2,7 @@
 
 A secure authentication backend for CampusNet, a campus-only digital repository and networking platform. This module handles user registration, login, profile management, and JWT-based authentication.
 
-**Developed by:** Nitya Jain 
+**Developed by:** Nitya Jain and Vimedha Chaturvedi
 **Date:** November 2025  
 **Institution:** Vellore Institute of Technology, AP
 
@@ -421,6 +421,7 @@ This project is developed as part of academic coursework at Vellore Institute of
 - Department: Artificial Intelligence & Machine Learning
 - Course: Capstone Project (Review-1)
 - Date: November 2025
+
 
 
 
