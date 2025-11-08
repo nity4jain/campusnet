@@ -11,13 +11,12 @@ export default function Header() {
     <header className="bg-white/80 backdrop-blur sticky top-0 z-40 border-b">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-brand to-accent flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-md">
             <AcademicCapIcon className="w-5 h-5" aria-hidden="true" />
             <span className="sr-only">CampusNet</span>
           </div>
           <div className="hidden sm:block">
             <div className="font-semibold text-lg">CampusNet</div>
-            <div className="text-xs text-slate-500">Community resources & chat</div>
           </div>
         </Link>
 
@@ -74,7 +73,7 @@ function UserMenu({ user, logout }) {
         type="button"
         aria-label="User menu"
         onClick={() => setOpen((v) => !v)}
-        className="w-9 h-9 rounded-full bg-gradient-to-r from-brand to-accent flex items-center justify-center text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand"
+        className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 shadow-md"
       >
         {initial ? (
           <span className="uppercase">{initial}</span>

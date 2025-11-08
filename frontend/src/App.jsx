@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -18,26 +19,34 @@ import Footer from './components/Layout/Footer';
 
 function AppShell() {
   const { user } = useAuth();
+  
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header />
-      <main className="container py-8 flex-1">
-        <Routes>
-          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-          <Route path="/chat/:category" element={user ? <Chat /> : <Navigate to="/login" />} />
-          <Route path="/resources" element={user ? <Resources /> : <Navigate to="/login" />} />
-          <Route path="/resource/:id" element={user ? <ResourceDetail /> : <Navigate to="/login" />} />
-          <Route path="/upload" element={user ? <Upload /> : <Navigate to="/login" />} />
-          <Route path="/myuploads" element={user ? <MyUploads /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
-          <Route path="/comments/:resourceId" element={user ? <Comments /> : <Navigate to="/login" />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      {/* Landing page - no header/footer */}
+      <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
+      
+      {/* All other routes with header/footer */}
+      <Route path="/*" element={
+        <div className="min-h-screen flex flex-col bg-slate-50">
+          <Header />
+          <main className="container py-8 flex-1">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+              <Route path="/chat/:category" element={user ? <Chat /> : <Navigate to="/login" />} />
+              <Route path="/resources" element={user ? <Resources /> : <Navigate to="/login" />} />
+              <Route path="/resource/:id" element={user ? <ResourceDetail /> : <Navigate to="/login" />} />
+              <Route path="/upload" element={user ? <Upload /> : <Navigate to="/login" />} />
+              <Route path="/myuploads" element={user ? <MyUploads /> : <Navigate to="/login" />} />
+              <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+              <Route path="/comments/:resourceId" element={user ? <Comments /> : <Navigate to="/login" />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      } />
+    </Routes>
   );
 }
 
