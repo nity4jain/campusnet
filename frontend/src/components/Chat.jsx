@@ -197,7 +197,13 @@ export default function Chat() {
 
   async function submit(e) {
     e.preventDefault();
-    if (!text.trim() && !file && !audioBlob) return;
+    if (!text.trim() && !file && !audioBlob) {
+      console.log('❌ Nothing to send');
+      return;
+    }
+    
+    console.log('📤 Sending message...', { category, text, hasFile: !!file, hasAudio: !!audioBlob });
+    
     const fd = new FormData();
     fd.append('category', category);
     fd.append('text', text);
@@ -205,15 +211,20 @@ export default function Chat() {
     fd.append('consent_for_contact', consent ? 'true' : 'false');
     if (file) fd.append('file', file);
     if (audioBlob) fd.append('file', new File([audioBlob], `voice-${Date.now()}.webm`, { type: audioBlob.type }));
+    
     try {
+      setLoading(true);
       const res = await postMessage(fd);
+      console.log('✅ Message sent successfully:', res);
       setMessages(prev => [res.post, ...prev]);
       setText(''); setFile(null); setConsent(false); setAudioBlob(null);
       setReplyTo(null);
       if (listRef.current) listRef.current.scrollTop = 0;
     } catch (err) {
-      console.error(err);
-      alert(err.message || JSON.stringify(err));
+      console.error('❌ Error sending message:', err);
+      alert('Failed to send message: ' + (err.message || err.error || JSON.stringify(err)));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -542,9 +553,8 @@ export default function Chat() {
                   {/* Timestamp */}
                   <div className={`
                     ${isMine(m) ? 'text-indigo-100' : 'text-gray-500'} 
-                    text-xs mt-2 flex items-center gap-1
+                    text-xs mt-2
                   `}>
-                    <ClockIcon className="w-3 h-3" />
                     {new Date(m.created_at || Date.now()).toLocaleTimeString('en-US', { 
                       hour: '2-digit', 
                       minute: '2-digit' 

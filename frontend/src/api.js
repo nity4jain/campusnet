@@ -108,12 +108,24 @@ export async function myUploads() {
 
 // Messages
 export async function postMessage(formData) {
+  console.log('🌐 API: postMessage called');
+  console.log('🔐 Auth headers:', getAuthHeaders());
+  console.log('📦 FormData contents:');
+  for (let pair of formData.entries()) {
+    console.log('  ', pair[0], ':', pair[1]);
+  }
+  
   const res = await fetch(`${API_BASE}/api/messages/post`, {
     method: 'POST',
     headers: { ...getAuthHeaders() },
     body: formData
   });
-  return handleRes(res);
+  
+  console.log('📡 Response status:', res.status);
+  const data = await handleRes(res);
+  console.log('📥 Response data:', data);
+  
+  return data;
 }
 
 export async function deleteMessage(id) {

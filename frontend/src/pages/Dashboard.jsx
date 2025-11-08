@@ -11,7 +11,8 @@ import {
   UserGroupIcon,
   EllipsisHorizontalCircleIcon,
   SparklesIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  WifiIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../auth/AuthContext';
 
@@ -144,7 +145,7 @@ export default function Dashboard() {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {categories.map(c => {
             const IconComponent = c.icon;
             return (
@@ -182,6 +183,35 @@ export default function Dashboard() {
               </Link>
             );
           })}
+        </div>
+
+        {/* WiFi Quick Access Banner */}
+        <div className="mb-12">
+          <Link 
+            to="/wifi"
+            className="group bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-between overflow-hidden relative"
+          >
+            {/* Animated Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mt-16"></div>
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mb-20"></div>
+            </div>
+            
+            <div className="relative z-10 flex items-center gap-4 flex-1">
+              <div className="flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur rounded-2xl">
+                <WifiIcon className="w-9 h-9 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-1">Campus WiFi Login</h3>
+                <p className="text-indigo-100">Quick access to hostel & campus WiFi authentication portals</p>
+              </div>
+            </div>
+            
+            <div className="relative z-10 flex items-center gap-2 text-white font-semibold px-6 py-3 bg-white/20 backdrop-blur rounded-xl group-hover:bg-white/30 transition-all">
+              <span>Access WiFi</span>
+              <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
         </div>
 
         {/* Help Section */}

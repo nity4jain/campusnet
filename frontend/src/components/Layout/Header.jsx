@@ -17,12 +17,14 @@ export default function Header() {
           </div>
           <div className="hidden sm:block">
             <div className="font-semibold text-lg">CampusNet</div>
+            <div className="text-xs text-slate-500">Community resources & chat</div>
           </div>
         </Link>
 
         <nav className="flex items-center gap-4">
           <Link to="/resources" className="text-sm text-slate-700 hover:text-slate-900">Resources</Link>
           <Link to="/dashboard" className="text-sm text-slate-700 hover:text-slate-900">Dashboard</Link>
+          <Link to="/wifi" className="text-sm text-slate-700 hover:text-slate-900">WiFi</Link>
           {user ? (
             <div className="relative">
               <UserMenu user={user} logout={logout} />

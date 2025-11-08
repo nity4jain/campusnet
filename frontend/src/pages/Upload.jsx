@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { uploadResource } from '../api';
 import { 
   CloudArrowUpIcon, 
   DocumentTextIcon,
@@ -82,10 +83,45 @@ export default function Upload() {
         </div>
 
         <form 
-          onSubmit={e => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            setLoading(true);
-            setTimeout(() => setLoading(false), 1300);
+            
+            if (!selectedFile) {
+              alert('Please select a file to upload');
+              return;
+            }
+
+            try {
+              setLoading(true);
+              
+              const formData = new FormData();
+              formData.append('title', fields.title);
+              formData.append('subject', fields.subject);
+              formData.append('description', fields.description || '');
+              formData.append('department', fields.department);
+              formData.append('year', fields.year);
+              formData.append('file', selectedFile);
+
+              const result = await uploadResource(formData);
+              
+              alert('Resource uploaded successfully! 🎉');
+              
+              // Reset form
+              setFields({});
+              setSelectedFile(null);
+              if (fileInput.current) {
+                fileInput.current.value = '';
+              }
+              
+              // Navigate to resources page to see the uploaded resource
+              navigate('/resources');
+              
+            } catch (err) {
+              console.error('Upload error:', err);
+              alert('Failed to upload resource: ' + (err.message || err.error || 'Unknown error'));
+            } finally {
+              setLoading(false);
+            }
           }}
           className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
         >

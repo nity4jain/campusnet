@@ -16,6 +16,22 @@ import {
 export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      {/* WiFi Requirement Notice Bar */}
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-3 sticky top-0 z-50 shadow-lg">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center gap-3 text-sm md:text-base">
+            <WifiIcon className="w-5 h-5 animate-pulse" />
+            <span className="font-semibold">
+              ⚠️ Campus WiFi Required
+            </span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden md:inline text-orange-100">
+              This application only works on hostel & campus WiFi networks
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800 text-white overflow-hidden">
         <div className="absolute top-4 right-4">
@@ -78,8 +94,64 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* WiFi Requirement Information Box */}
+      <section className="py-12 bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-2xl p-8 shadow-lg">
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <WifiIcon className="w-9 h-9 text-white" />
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    Campus WiFi Access Only
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">
+                      Required
+                    </span>
+                  </h3>
+                  
+                  <p className="text-gray-700 mb-4 text-lg">
+                    CampusNet is <strong>exclusively accessible through campus and hostel WiFi networks</strong> for enhanced security and privacy. This ensures that all resources and communications remain within the campus community.
+                  </p>
+                  
+                  <div className="grid md:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                      <div className="text-sm font-semibold text-indigo-600 mb-1">🏠 Ladies Hostel - 1</div>
+                      <div className="text-xs text-gray-600">hfw2.vitap.ac.in</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                      <div className="text-sm font-semibold text-indigo-600 mb-1">🏛️ Men's Hostel - 2</div>
+                      <div className="text-xs text-gray-600">hfw.vitap.ac.in</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                      <div className="text-sm font-semibold text-indigo-600 mb-1">🏢 Central Block</div>
+                      <div className="text-xs text-gray-600">172.18.10.10</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex-shrink-0">
+                      <svg className="w-5 h-5 text-amber-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 text-sm text-amber-800">
+                      <strong>Important:</strong> The application will not function if accessed from outside the campus WiFi network. You must be connected to your hostel or campus WiFi to use CampusNet.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Capstone Project Attribution */}
-      <div className="text-center py-4 text-gray-600">
+      <div className="text-center py-4 text-gray-600 bg-gray-50">
         <p className="text-sm">A Capstone Project by VIT-AP University Students</p>
       </div>
 
@@ -357,7 +429,7 @@ export default function Landing() {
                 Capstone Project by Nitya Jain & Vimedha Chaturvedi
               </p>
               <p className="text-indigo-200 text-sm">
-                VIT-AP University | Department of AI & ML
+                VIT-AP University
               </p>
             </div>
           </div>
