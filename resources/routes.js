@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 const verifyToken = require('../middleware/auth');
 const Resource = require('../models/Resource');
 const Comment = require('../models/Comment');
@@ -14,27 +15,50 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
+// Multer storage for resource uploads (same uploads folder as messages)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const base = path.basename(file.originalname, ext).replace(/[^a-z0-9-_]/gi, '_');
+    cb(null, `${Date.now()}_${base}${ext}`);
+  }
+});
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+
 // ========== ENDPOINT 1: UPLOAD RESOURCE ==========
-router.post('/upload', verifyToken, async (req, res) => {
+// Accept either JSON (with file_url) or multipart/form-data with a 'file' field
+router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
   try {
+    // Fields may come in req.body; if file was uploaded, req.file will be set
     const { title, subject, year, description, file_url, tags } = req.body;
 
+    // Determine file URL: prefer uploaded file, otherwise body file_url
+    let finalFileUrl = file_url;
+    if (req.file) {
+      finalFileUrl = `/uploads/${req.file.filename}`;
+    }
+
     // Validate input
-    if (!title || !subject || !year || !file_url) {
+    if (!title || !subject || !year || !finalFileUrl) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Please provide title, subject, year, and file_url'
+        message: 'Please provide title, subject, year, and file (or file_url)'
       });
     }
+
+    const parsedYear = parseInt(year);
 
     // Create new resource
     const newResource = new Resource({
       title,
       subject,
-      year,
+      year: parsedYear,
       description,
-      file_url,
-      tags: tags || [],
+      file_url: finalFileUrl,
+      tags: (typeof tags === 'string' && tags) ? tags.split(',').map(t => t.trim()) : (tags || []),
       uploaded_by: req.user_id
     });
 

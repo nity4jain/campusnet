@@ -18,8 +18,15 @@ const userSchema = new mongoose.Schema({
     required: true 
   },
   full_name: String,
+  student_id: { type: String, index: true },
+  phone: { type: String, index: true },
+  is_hosteller: { type: Boolean, default: false },
+  hostel: { type: String, default: null },
   department: String,
+  degree: String,
+  branch: String,
   year: Number,
+  consent_for_contact: { type: Boolean, default: false },
   role: { 
     type: String, 
     enum: ['student', 'faculty', 'admin'],

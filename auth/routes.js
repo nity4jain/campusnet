@@ -6,12 +6,27 @@ const verifyToken = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
   try {
-    const { email, username, password, full_name } = req.body;
+    const {
+      email,
+      username,
+      password,
+      full_name,
+      student_id,
+      phone,
+      is_hosteller,
+      hostel,
+      degree,
+      branch,
+      department,
+      year,
+      consent_for_contact
+    } = req.body;
 
-    if (!email || !username || !password) {
+    // Basic required fields
+    if (!email || !username || !password || !student_id || !phone) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Please provide email, username, and password'
+        message: 'Please provide email, username, password, student_id and phone'
       });
     }
 
@@ -23,13 +38,18 @@ router.post('/register', async (req, res) => {
     }
 
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
+      $or: [
+        { email: email.toLowerCase() },
+        { username },
+        { student_id },
+        { phone }
+      ]
     });
 
     if (existingUser) {
       return res.status(409).json({
         error: 'User already exists',
-        message: 'Email or username already registered'
+        message: 'Email, username, student ID or phone already registered'
       });
     }
 
@@ -37,7 +57,16 @@ router.post('/register', async (req, res) => {
       email: email.toLowerCase(),
       username,
       password,
-      full_name
+      full_name,
+      student_id,
+      phone,
+      is_hosteller: !!is_hosteller,
+      hostel: is_hosteller ? hostel || null : null,
+      degree,
+      branch,
+      department,
+      year,
+      consent_for_contact: !!consent_for_contact
     });
 
     await newUser.save();
@@ -45,7 +74,9 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign(
       {
         user_id: newUser._id,
-        email: newUser.email
+        email: newUser.email,
+        username: newUser.username,
+        student_id: newUser.student_id
       },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
@@ -59,7 +90,16 @@ router.post('/register', async (req, res) => {
         user_id: newUser._id,
         email: newUser.email,
         username: newUser.username,
-        role: newUser.role
+        role: newUser.role,
+        student_id: newUser.student_id,
+        phone: newUser.phone,
+        is_hosteller: newUser.is_hosteller,
+        hostel: newUser.hostel,
+        degree: newUser.degree,
+        branch: newUser.branch,
+        department: newUser.department,
+        year: newUser.year,
+        consent_for_contact: newUser.consent_for_contact
       }
     });
 
@@ -74,21 +114,30 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body; // email may be email/username/student_id/phone
 
     if (!email || !password) {
       return res.status(400).json({
         error: 'Missing credentials',
-        message: 'Please provide email and password'
+        message: 'Please provide identifier and password'
       });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const identifier = email;
+
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { username: identifier },
+        { student_id: identifier },
+        { phone: identifier }
+      ]
+    });
 
     if (!user) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
+        message: 'Identifier or password is incorrect'
       });
     }
 
@@ -97,14 +146,16 @@ router.post('/login', async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
+        message: 'Identifier or password is incorrect'
       });
     }
 
     const token = jwt.sign(
       {
         user_id: user._id,
-        email: user.email
+        email: user.email,
+        username: user.username,
+        student_id: user.student_id
       },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
@@ -119,8 +170,15 @@ router.post('/login', async (req, res) => {
         email: user.email,
         username: user.username,
         role: user.role,
+        student_id: user.student_id,
+        phone: user.phone,
+        is_hosteller: user.is_hosteller,
+        hostel: user.hostel,
+        degree: user.degree,
+        branch: user.branch,
         department: user.department,
-        year: user.year
+        year: user.year,
+        consent_for_contact: user.consent_for_contact
       }
     });
 
@@ -158,15 +216,35 @@ router.get('/profile', verifyToken, async (req, res) => {
 
 router.put('/profile', verifyToken, async (req, res) => {
   try {
-    const { department, year, full_name } = req.body;
+    const {
+      department,
+      year,
+      full_name,
+      phone,
+      student_id,
+      is_hosteller,
+      hostel,
+      degree,
+      branch,
+      consent_for_contact
+    } = req.body;
+
+    const update = {
+      department,
+      year,
+      full_name,
+      phone,
+      student_id,
+      is_hosteller,
+      hostel: is_hosteller ? hostel || null : null,
+      degree,
+      branch,
+      consent_for_contact
+    };
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user_id,
-      {
-        department,
-        year,
-        full_name
-      },
+      update,
       { new: true }
     ).select('-password');
 
